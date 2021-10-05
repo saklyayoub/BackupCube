@@ -1,0 +1,64 @@
+version: '3.1'
+volumes:
+  db: {}
+  wp: {}
+  backup: {}
+  #s3backup_wp:
+    #external: true
+services:
+  db:
+    container_name: db
+    image: mysql:5.7.23
+    restart: unless-stopped
+    env_file: 
+        - .env
+    environment:
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASS}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+    volumes:
+      - db:/var/lib/mysql
+     #- .mysql_init:/docker-entrypoint-initdb.d
+  wordpress:
+    container_name: wordpress
+    image: wordpress:php7.4-apache
+    restart: unless-stopped
+    volumes:
+      - wp:/var/www/html
+    links:
+      - db:db
+    env_file: 
+      - .env
+    environment:
+      - WORDPRESS_DB_HOST=${DB_HOST}
+      - WORDPRESS_DB_USER=${DB_USER}
+      - WORDPRESS_DB_NAME=${DB_NAME}
+      - WORDPRESS_DB_PASSWORD=${DB_PASS}
+    ports:
+      - 80:80
+  s3backup:
+    #image: saklyayoub/s3backup
+    container_name: s3backup
+    build: ./
+    user: "0:0"
+
+    links:
+      - db:db
+    volumes:
+      - wp:/input
+      - backup:/output
+    env_file: 
+      - .env
+    environment:
+      - TZ=${TZ}
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - AWS_ACCESS=${AWS_ACCESS}
+      - AWS_SECRET=${AWS_SECRET}
+      - AWS_REGION=${AWS_REGION}
+      - S3_BUCKETS=${S3_BUCKETS}
+      - CRON_TIME=${CRON_TIME}
