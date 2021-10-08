@@ -1,4 +1,8 @@
 #!/bin/sh
+#
+#
+#Global Vars
+. /.env
 LogoPrint() {
     cat <<"EOF"
 
@@ -21,25 +25,36 @@ LogoPrint() {
 
 EOF
 }
-SetupS3Credential() {
-    aws configure set aws_access_key_id $AWS_ACCESS
-    aws configure set aws_secret_access_key $AWS_SECRET
-    aws configure set default.region $AWS_REGION
-    echo "[$(date)] Setting up AWS credentials."
+BackupConfig() {
+    if [ "$BACKUP_CONF" = "s3" ]; then
+        echo "[$(date)] Backup configured on S3"
+        aws configure set aws_access_key_id $AWS_ACCESS
+        aws configure set aws_secret_access_key $AWS_SECRET
+        aws configure set default.region $AWS_REGION
+        echo "[$(date)] Setting up AWS credentials."
+    elif [ "$BACKUP_CONF" = "local" ]; then
+        echo "[$(date)] Backup configured locally"
+    else
+        echo "[$(date)] Error: BACKUP_CONF=\"$BACKUP_CONF\" from .env must be \"local\" or \"s3\" only!"
+        exit
+    fi
 }
 CronSetup(){
 cat <<EOT >> /crontab.conf
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-${CRON_TIME} /usr/bin/backup.sh >> /var/log/s3backup.log 2>&1
+${CRON_TIME} /backup.sh >> /var/log/s3backup.log 2>&1 
 EOT
     crontab /crontab.conf
     echo "[$(date)] Setting up cron configuration."
 }
 
+
+
+
 LogoPrint
-SetupS3Credential
+BackupConfig
 touch /var/log/s3backup.log
 tail -F /var/log/s3backup.log &
 CronSetup
+echo ""
 echo "[$(date)] >>Running backup on cron task manager"
 exec cron -f

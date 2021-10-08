@@ -2,6 +2,7 @@
 #
 #
 #Global Vars
+. /.env
 BACKUP_NAME="$(date +%Y%m%d_%H%M).zip"
 #
 #
@@ -9,12 +10,14 @@ BACKUP_NAME="$(date +%Y%m%d_%H%M).zip"
 if [ -d "/input/.mysql_init" ]; then
     rm -Rf /input/.mysql_init
     mkdir -p /input/.mysql_init
+    echo ""
     echo "[$(date)] Renitilize database init directory"
 else
     mkdir -p /input/.mysql_init
+    echo ""
     echo "[$(date)] Create new database init directory"
 fi
-/usr/bin/mysqldump -u root --password=$DB_ROOT_PASSWORD --host=$DB_HOST $DB_NAME >/input/.mysql_init/dump.sql
+/usr/bin/mysqldump -u root --password=$DB_ROOT_PASSWORD --host=$DB_HOST --databases $DB_NAME > /input/.mysql_init/dump.sql
 if [ "$?" -eq "0" ]; then
     echo "[$(date)] Database successfully dumped."
 else
@@ -33,29 +36,32 @@ else
 fi
 #
 #
-#S3_UPLOAGIN
-#echo "[$(date)] Uploading to S3 bucket... Please wait"
-#aws s3api put-object --bucket $S3_BUCKET --key $BACKUP_NAME --body /$TMP/$BACKUP_NAME 2>&1
-#if [ "$?" -eq "0" ]; then
-#    echo "[$(date)] Uploading to S3 Bucket=$S3_BUCKET successfully done."
-#else
-#    echo "[$(date)] Error: Fail uploading to S3 Bucket."
-#    exit
+#S3_UPLOADING
+#if [ "$BACKUP_CONF" = "s3" ]; then
+#    echo "[$(date)] Uploading to S3 bucket... Please wait"
+#    aws s3api put-object --bucket $S3_BUCKET --key $BACKUP_NAME --body /$TMP/$BACKUP_NAME 2>&1
+#    if [ "$?" -eq "0" ]; then
+#        echo "[$(date)] Uploading to S3 Bucket=$S3_BUCKET successfully done."
+#    else
+#        echo "[$(date)] Error: Fail uploading to S3 Bucket."
+#        exit
+#    fi
 #fi
 #
 #
 #CleaningUP
-#echo "[$(date)] Cleaning tmp..."
-#rm /output/$BACKUP_NAME
-#if [ "$?" -eq "0" ]; then
-#    echo "[$(date)] Clean up local old backup from /output."
-#else
-#    echo "[$(date)] Error: Fail to clean up local old backup from /output."
-#    exit
-#fi
+if [ "$BACKUP_CONF" = "s3" ]; then
+    echo "[$(date)] Cleaning tmp..."
+    rm /output/$BACKUP_NAME
+    if [ "$?" -eq "0" ]; then
+        echo "[$(date)] Clean up local old backup from /output."
+    else
+        echo "[$(date)] Error: Fail to clean up local old backup from /output."
+        exit
+    fi
+fi
 #
 #
 #Done!
-echo " "
 echo "[$(date)] >>Buckup successfully done, Ref=$BACKUP_NAME"
 exit

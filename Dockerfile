@@ -20,8 +20,8 @@ VOLUME /var/log/
 VOLUME /input
 VOLUME /output
 
-COPY ["run.sh", "backup.sh", "/usr/bin/"]
-RUN chmod u+x /usr/bin/run.sh /usr/bin/backup.sh && \
+COPY ["run.sh", "backup.sh", "/"]
+RUN chmod a+x /run.sh /backup.sh && \
     echo $TZ >  /etc/timezone
 
-CMD ["/usr/bin/run.sh"]
+CMD ["/run.sh"]

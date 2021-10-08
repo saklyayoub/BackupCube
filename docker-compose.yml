@@ -42,23 +42,9 @@ services:
     container_name: s3backup
     build: ./
     user: "0:0"
-
     links:
       - db:db
     volumes:
       - wp:/input
       - backup:/output
-    env_file: 
-      - .env
-    environment:
-      - TZ=${TZ}
-      - DB_HOST=${DB_HOST}
-      - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASS}
-      - DB_NAME=${DB_NAME}
-      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - AWS_ACCESS=${AWS_ACCESS}
-      - AWS_SECRET=${AWS_SECRET}
-      - AWS_REGION=${AWS_REGION}
-      - S3_BUCKETS=${S3_BUCKETS}
-      - CRON_TIME=${CRON_TIME}
+      - .env:/.env
