@@ -37,16 +37,16 @@ fi
 #
 #
 #S3_UPLOADING
-#if [ "$BACKUP_CONF" = "s3" ]; then
-#    echo "[$(date)] Uploading to S3 bucket... Please wait"
-#    aws s3api put-object --bucket $S3_BUCKET --key $BACKUP_NAME --body /$TMP/$BACKUP_NAME 2>&1
-#    if [ "$?" -eq "0" ]; then
-#        echo "[$(date)] Uploading to S3 Bucket=$S3_BUCKET successfully done."
-#    else
-#        echo "[$(date)] Error: Fail uploading to S3 Bucket."
-#        exit
-#    fi
-#fi
+if [ "$BACKUP_CONF" = "s3" ]; then
+    echo "[$(date)] Uploading to S3 bucket... Please wait"
+    /usr/local/bin/aws s3api put-object --bucket $S3_BUCKET --key $BACKUP_NAME --body /output/$BACKUP_NAME 2>&1
+    if [ "$?" -eq "0" ]; then
+        echo "[$(date)] Uploading to S3 Bucket=$S3_BUCKET successfully done."
+    else
+        echo "[$(date)] Error: Fail uploading to S3 Bucket."
+        exit
+    fi
+fi
 #
 #
 #CleaningUP
