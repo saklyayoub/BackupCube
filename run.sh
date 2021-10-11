@@ -46,10 +46,6 @@ EOT
     crontab /crontab.conf
     echo "[$(date)] Setting up cron configuration."
 }
-
-
-
-
 LogoPrint
 BackupConfig
 touch /var/log/s3backup.log
