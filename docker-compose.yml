@@ -5,7 +5,7 @@ volumes:
     #external: true
 services:
   s3backup:
-    #image: saklyayoub/s3backup
+    #image: saklyayoub/backupcube
     container_name: s3backup
     build: ./
     user: "0:0"
